@@ -1,5 +1,4 @@
 # CharacterCodex
-CharacterCodex
 Preface:
 
 Hey everyone. With the help of AI, a lot of headaches, bug fixing, and two sleepless nights, I built this tool. I made it specifically for myself to use alongside TunnelVision/Coneja-Chibi. I was inspired by TV, and I am super grateful to the author for such a cool tool, but it felt like it was trying to take on absolutely everything. It worked mostly, but not always, so I decided to make my own tool. 
