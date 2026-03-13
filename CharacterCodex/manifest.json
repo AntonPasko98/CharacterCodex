@@ -1,8 +1,0 @@
-{
-    "name": "CharacterCodex",
-    "display_name": "Character Codex",
-    "version": "1.0.0",
-    "description": "Interactive Character Codex",
-    "author": "UpbeatTrash5423",
-    "js": "index.js"
-}
