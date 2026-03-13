@@ -417,9 +417,11 @@ Example: {"entities": [ {"name": "Rex", "status": "Shot in the shoulder", "chang
                         if (foundNames.has(name)) continue;
 
                         let cardLorebook = data.lorebook || "Global";
-                        if (cardLorebook !== "Global" && cardLorebook !== currentActiveBook) {
+                        let aiRequestedBook = args.lorebook || "Global";
+                        if (cardLorebook !== "Global" && cardLorebook !== currentActiveBook && cardLorebook !== aiRequestedBook) {
                             continue;
                         }
+
 
                         if (name.toLowerCase().includes(term) || (data.tags && data.tags.toLowerCase().includes(term))) {
                             results.push({
@@ -478,9 +480,11 @@ Example: {"entities": [ {"name": "Rex", "status": "Shot in the shoulder", "chang
                     const existing = context.extensionSettings[MODULE_NAME].entities[name] || {};
 
                     let existingLorebook = existing.lorebook || "Global";
-                    if (existing.lorebook && existingLorebook !== "Global" && existingLorebook !== currentActiveBook) {
+                    let aiProvidedBook = ent.lorebook || "Global";ки
+                    if (existing.lorebook && existingLorebook !== "Global" && existingLorebook !== currentActiveBook && existingLorebook !== aiProvidedBook) {
                         continue;
                     }
+
 
                     let assignedLorebook = existing.lorebook ? existing.lorebook : (ent.lorebook || "Global");
                     if (!existing.lorebook && assignedLorebook === "Global" && currentActiveBook !== "Global") {
@@ -1392,4 +1396,5 @@ Example: {"entities": [ {"name": "Rex", "status": "Shot in the shoulder", "chang
     });
 
 });
+
 
