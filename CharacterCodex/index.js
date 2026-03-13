@@ -311,7 +311,8 @@ Example: {"entities": [ {"name": "Rex", "status": "Shot in the shoulder", "chang
                 box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 25px rgba(0, 229, 255, 0.3);
             }
             .codex-detail-avatar-wrap img {
-                max-width: 100%; max-height: 400px; width: auto; height: auto; object-fit: contain;
+                max-width: 400px;
+                max-height: 400px; width: auto; height: auto; object-fit: contain;
                 display: block; border-radius: 12px; background: transparent; box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             }
             .codex-detail-avatar-wrap.empty i { font-size: 5em; color: rgba(255,255,255,0.2); padding: 50px; background: rgba(0,0,0,0.6); border-radius: 12px; width: 100%; display: flex; align-items: center; justify-content: center; }
@@ -695,13 +696,13 @@ Example: {"entities": [ {"name": "Rex", "status": "Shot in the shoulder", "chang
                <i class="fa-solid fa-image" style="display:none;"></i>`
             : `<i class="fa-solid ${isCharDead ? 'fa-skull' : 'fa-image'}" style="color:${isCharDead ? 'rgba(255, 42, 95, 0.5)' : 'rgba(255,255,255,0.2)'};"></i>`;
 
-        $('#codex-detail-modal .codex-detail-header').html(`
+                $('#codex-detail-modal .codex-detail-header').html(`
             <div class="codex-detail-avatar-wrap ${wrapClass}" style="${deadBorder}">
                 ${avatarHtml}
             </div>
-            <div style="flex-grow: 1;">
-                <h2 style="margin:0; font-size:2.5em; color:#fff; font-weight:800; letter-spacing: 0.5px; text-shadow: 0 4px 15px rgba(0,0,0,0.8); ${isCharDead ? 'text-decoration: line-through; color: var(--cdx-text-sub);' : ''}">${name}</h2>
-                <div style="color:var(--cdx-clr-3); font-size:0.9em; margin-top:8px; text-transform: uppercase; letter-spacing: 2px; font-weight: 800;">
+            <div style="flex-grow: 1; padding-right: 40px; min-width: 0;">
+                <h2 style="margin:0; font-size:2.5em; color:#fff; font-weight:800; letter-spacing: 0.5px; line-height: 1.15; word-break: break-word; text-shadow: 0 4px 15px rgba(0,0,0,0.8); ${isCharDead ? 'text-decoration: line-through; color: var(--cdx-text-sub);' : ''}">${name}</h2>
+                <div style="color:var(--cdx-clr-3); font-size:0.9em; margin-top:12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 800;">
                     <i class="fa-solid fa-book-atlas" style="margin-right: 6px;"></i> ${data.lorebook || 'Global'}
                 </div>
                 <div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:8px;">
@@ -1391,3 +1392,4 @@ Example: {"entities": [ {"name": "Rex", "status": "Shot in the shoulder", "chang
     });
 
 });
+
