@@ -1,4 +1,3 @@
-# It's broken. My fault. I'll fix it after work.
 # CharacterCodex
 # IMPORTANT: YOU NEED TO USE AN AI WITH TOOL CALLING SUPPORT!!!
 
