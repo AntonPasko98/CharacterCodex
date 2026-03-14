@@ -75,7 +75,7 @@ The tool accepts an array 'queries'. If you need to check multiple entities, DO 
 Pass all their names/titles as a list in a SINGLE call.
 Example call: {"queries": ["John Doe", "The Drunken Dragon Tavern", "Raven Faction", "Alice", "Sword of a Thousand Truths"]}`;
 
-    const defaultUpsertDesc = `Create or UPDATE cards in the 'Character Codex' (Characters, Factions, LOCATIONS, Artifacts).
+    const defaultUpsertDesc = `Create, UPDATE, or DELETE cards in the 'Character Codex' (Characters, Factions, LOCATIONS, Artifacts).
 
 HARD RULES:
 1. LANGUAGE: Match the language of the current roleplay.
@@ -85,11 +85,12 @@ HARD RULES:
 5. RELATIONS: STRICT JSON {"Full Name": "Description of the relationship"}. For locations, you can indicate who is there or who owns it.
 6. STATUS: Current position, character's health, or location state (e.g., "Destroyed", "Thriving", "Abandoned").
 7. CREATION: Save characters, factions, artifacts, and LOCATIONS to the database. If you indicate a relationship with a new entity/location, create a card for it too!
+8. DELETION: To permanently delete a card (e.g., duplicate or complete erasure), pass "delete_card": true for that entity.
 
-MASS UPDATE (IMPORTANT!):
-The tool accepts an array 'entities'. If you need to update/create multiple entities, pass ALL of them in one list in a single call! DO NOT make parallel calls.
-For existing cards, pass only the fields that have changed (e.g., status).
-Example: {"entities": [ {"name": "John Smith", "status": "Shot in the shoulder", "changelog_note": "Wounded"}, {"name": "The Drunken Dragon Tavern", "tags": "location, tavern", "desc": "Mercenary gathering place", "status": "Burned down"} ]}`;
+MASS UPDATE/MERGE (IMPORTANT!):
+The tool accepts an array 'entities'. If you need to update/create/delete multiple entities, pass ALL of them in one list in a single call! DO NOT make parallel calls.
+For existing cards, pass only the fields that have changed (e.g., status). To merge, update the main card and delete the duplicate in the same array.
+Example: {"entities": [ {"name": "John Smith", "status": "Shot in the shoulder", "changelog_note": "Wounded"}, {"name": "John Duplicate", "delete_card": true} ]}`;
 
     if (!context.extensionSettings[MODULE_NAME].searchPrompt) context.extensionSettings[MODULE_NAME].searchPrompt = defaultSearchDesc;
     if (!context.extensionSettings[MODULE_NAME].upsertPrompt) context.extensionSettings[MODULE_NAME].upsertPrompt = defaultUpsertDesc;
@@ -460,7 +461,7 @@ Example: {"entities": [ {"name": "John Smith", "status": "Shot in the shoulder",
                 properties: {
                     entities: {
                         type: "array",
-                        description: "Array of entity objects for mass creation/updating.",
+                        description: "Array of entity objects for mass creation/updating/deletion.",
                         items: {
                             type: "object",
                             properties: {
@@ -468,12 +469,12 @@ Example: {"entities": [ {"name": "John Smith", "status": "Shot in the shoulder",
                                 appearance: { type: "string" }, personality: { type: "string" },
                                 status: { type: "string" }, inventory: { type: "string" },
                                 relations: { type: "object" }, changelog_note: { type: "string" },
-                                lorebook: { type: "string" }
+                                lorebook: { type: "string" }, delete_card: { type: "boolean" }
                             },
-                            required: ["name", "tags"]
+                            required: ["name"]
                         }
                     },
-                    name: { type: "string" }, tags: { type: "string" }, desc: { type: "string" }, appearance: { type: "string" }, personality: { type: "string" }, status: { type: "string" }, inventory: { type: "string" }, relations: { type: "object" }, changelog_note: { type: "string" }, lorebook: { type: "string" }
+                    name: { type: "string" }, tags: { type: "string" }, desc: { type: "string" }, appearance: { type: "string" }, personality: { type: "string" }, status: { type: "string" }, inventory: { type: "string" }, relations: { type: "object" }, changelog_note: { type: "string" }, lorebook: { type: "string" }, delete_card: { type: "boolean" }
                 }
             },
             action: async (args) => {
@@ -485,17 +486,28 @@ Example: {"entities": [ {"name": "John Smith", "status": "Shot in the shoulder",
                 if (Array.isArray(args.entities)) {
                     entitiesToProcess = [...args.entities];
                 }
-                if (args.name && args.tags) {
+                // allow just name + delete_card as well
+                if (args.name) {
                     entitiesToProcess.push(args);
                 }
 
                 if (entitiesToProcess.length === 0) return "Error: No entities provided.";
 
                 let savedNames = [];
+                let deletedNames = [];
 
                 for (const ent of entitiesToProcess) {
                     const name = ent.name ? ent.name.trim() : null;
                     if (!name) continue;
+
+                    // NEW LOGIC: Deletion
+                    if (ent.delete_card === true) {
+                        if (context.extensionSettings[MODULE_NAME].entities[name]) {
+                            delete context.extensionSettings[MODULE_NAME].entities[name];
+                            deletedNames.push(name);
+                        }
+                        continue;
+                    }
 
                     const existing = context.extensionSettings[MODULE_NAME].entities[name] || {};
 
@@ -533,9 +545,14 @@ Example: {"entities": [ {"name": "John Smith", "status": "Shot in the shoulder",
                 context.saveSettingsDebounced();
                 debouncedRenderGallery();
 
-                if (savedNames.length > 0) {
-                    toastr.success(`AI updated Codex: ${savedNames.join(', ')}`);
-                    return `Successfully saved/updated: ${savedNames.join(', ')}.`;
+                let resultMessages = [];
+                if (savedNames.length > 0) resultMessages.push(`Saved/Updated: ${savedNames.join(', ')}`);
+                if (deletedNames.length > 0) resultMessages.push(`Deleted: ${deletedNames.join(', ')}`);
+
+                if (resultMessages.length > 0) {
+                    let combinedMsg = resultMessages.join(' | ');
+                    toastr.success(`AI modified Codex`);
+                    return `Successfully processed. ${combinedMsg}`;
                 }
                 return "Error: Failed to process entities or blocked by Lorebook restrictions.";
             }
